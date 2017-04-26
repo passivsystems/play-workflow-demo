@@ -8,3 +8,19 @@
   @inputText(stepForm("name"))
   <button type="submit">Next</button>
 </form>
+
+<button id="ws" onclick="javascript:testWs();">Test websocket</button><div id="wsresult"/>
+
+<script type="text/javascript">
+  function testWs() {
+    document.getElementById("wsresult").innerHTML = "";
+    var url = ((document.location.protocol == "https:") ? "wss:" : "ws:") + document.location.host + document.location.pathname + "/ws";
+    var socket = new WebSocket(url);
+    socket.onmessage = function (event) {
+      document.getElementById("wsresult").innerHTML = "WS responded:" + event.data;
+    }
+    socket.onopen = function (event) {
+      socket.send("Input");
+    }
+  }
+</script>

@@ -31,6 +31,10 @@ object ExampleFlow extends Controller {
   def post(stepId: String) = Action.async { implicit request =>
     WorkflowExecutor.postWorkflow(conf, stepId)
   }
+
+  def ws(stepId: String) = WebSocket { implicit request =>
+    WorkflowExecutor.wsWorkflow(conf, stepId)
+  }
 }
 
 // ------------- step1 ---------------------------------------------------------
@@ -61,9 +65,28 @@ object Step1 extends Controller {
       )
     }
 
+    // TODO inject implicits (similarly Play.application, Messages)
+    implicit val system = akka.actor.ActorSystem()
+    implicit val materializer = akka.stream.ActorMaterializer()
+
+    def ws(ctx: WorkflowContext[Step1Result])(implicit request: RequestHeader) =
+      WebSocket.acceptWithActor[String, String] { implicit request => out =>
+      akka.actor.Props(new MyStepActor(out))
+    }
+
+    class MyStepActor(out: akka.actor.ActorRef) extends akka.actor.Actor {
+
+      override def receive = {
+        case input =>
+          out ! s"echo: $input"
+          context.stop(self)
+      }
+    }
+
     Step[Step1Result](
       get  = ctx => request => get(ctx)(request).map(Some(_)),
-      post = ctx => request => post(ctx)(request)
+      post = ctx => request => post(ctx)(request),
+      ws   = ctx => request => Future(Some(ws(ctx)(request)))
     )
   }
 }
