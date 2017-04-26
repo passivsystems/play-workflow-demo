@@ -1,0 +1,10 @@
+@import example._
+@import helper._
+
+@(ctx: workflow.WorkflowContext[Step1Result], stepForm: Form[Step1Result])(implicit messages: Messages)
+
+@stepForm.globalError.map { error => @Html(Messages(error.message)) }
+<form role="form" method="post" action="@ctx.actionCurrent">
+  @inputText(stepForm("name"))
+  <button type="submit">Next</button>
+</form>

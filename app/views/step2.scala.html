@@ -1,0 +1,9 @@
+@import example._
+
+@(ctx: workflow.WorkflowContext[Unit], step1Result: Step1Result)
+
+<p>Hello @step1Result.name</p>
+
+@ctx.actionPrevious.map { previous =>
+  <a href="@previous">Back</a>
+}

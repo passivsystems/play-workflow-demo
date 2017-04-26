@@ -1,0 +1,2 @@
+POST    /exampleflow/:stepKey    example.ExampleFlow.post(stepKey)
+GET     /exampleflow/:stepKey    example.ExampleFlow.get(stepKey)
