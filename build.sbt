@@ -11,6 +11,4 @@ libraryDependencies ++= Seq(
   "com.passivsystems" %% "play-workflow" % "0.1.1-SNAPSHOT"
 )
 
-routesGenerator := StaticRoutesGenerator
-
 enablePlugins(PlayScala)

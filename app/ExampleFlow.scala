@@ -1,20 +1,24 @@
 package example
 
-import play.api.mvc._
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.stream.Materializer
+import javax.inject.Inject
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.data.{Form, Forms}
+import play.api.libs.streams.ActorFlow
+import play.api.mvc._
 import workflow._
 import workflow.implicits._
-import scala.concurrent.Future
-
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 // ------------- flow ----------------------------------------------------------
 
-object ExampleFlow extends Controller {
+class ExampleFlow @Inject()(implicit ec: ExecutionContext,
+                                     actorSystem: ActorSystem,
+                                     materializer: Materializer,
+                                     val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
-  val workflow: Workflow[Unit] =
+  def workflow: Workflow[Unit] =
     for {
       step1Result <- Workflow.step("step1", Step1())
       _           <- Workflow.step("step2", Step2(step1Result))
@@ -43,7 +47,10 @@ case class Step1Result(name: String)
 
 object Step1 extends Controller {
 
-  def apply(): Step[Step1Result] = {
+  def apply()(implicit ec: ExecutionContext,
+                       actorSystem: ActorSystem,
+                       materializer: Materializer,
+                       messages: Messages): Step[Step1Result] = {
 
     val form = Form(Forms.mapping(
         "name" -> Forms.nonEmptyText
@@ -65,16 +72,12 @@ object Step1 extends Controller {
       )
     }
 
-    // TODO inject implicits (similarly Play.application, Messages)
-    implicit val system = akka.actor.ActorSystem()
-    implicit val materializer = akka.stream.ActorMaterializer()
-
     def ws(ctx: WorkflowContext[Step1Result])(implicit request: RequestHeader) =
-      WebSocket.acceptWithActor[String, String] { implicit request => out =>
-      akka.actor.Props(new MyStepActor(out))
-    }
+      WebSocket.accept[String, String] { implicit request =>
+        ActorFlow.actorRef(out => Props(new MyStepActor(out)))
+      }
 
-    class MyStepActor(out: akka.actor.ActorRef) extends akka.actor.Actor {
+    class MyStepActor(out: ActorRef) extends Actor {
 
       override def receive = {
         case input =>
@@ -95,7 +98,7 @@ object Step1 extends Controller {
 
 object Step2 extends Controller {
 
-  def apply(step1Result: Step1Result): Step[Unit] = {
+  def apply(step1Result: Step1Result)(implicit ec: ExecutionContext): Step[Unit] = {
 
     def get(ctx: WorkflowContext[Unit])(implicit request: Request[Any]): Future[Result] =
       Future(Ok(views.html.step2(ctx, step1Result)))
