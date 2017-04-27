@@ -16,9 +16,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class ExampleFlow @Inject()(implicit ec: ExecutionContext,
                                      actorSystem: ActorSystem,
                                      materializer: Materializer,
-                                     val messagesApi: MessagesApi) extends Controller with I18nSupport {
+                                     val messagesApi: MessagesApi) {
 
-  def workflow: Workflow[Unit] =
+  val workflow: Workflow[Unit] =
     for {
       step1Result <- Workflow.step("step1", Step1())
       _           <- Workflow.step("step2", Step2(step1Result))
@@ -45,18 +45,19 @@ class ExampleFlow @Inject()(implicit ec: ExecutionContext,
 
 case class Step1Result(name: String)
 
-object Step1 extends Controller {
+object Step1 extends Results {
 
   def apply()(implicit ec: ExecutionContext,
                        actorSystem: ActorSystem,
                        materializer: Materializer,
-                       messages: Messages): Step[Step1Result] = {
+                       messagesApi: MessagesApi): Step[Step1Result] = {
 
     val form = Form(Forms.mapping(
         "name" -> Forms.nonEmptyText
       )(Step1Result.apply)(Step1Result.unapply))
 
     def get(ctx: WorkflowContext[Step1Result])(implicit request: Request[Any]): Future[Result] = Future {
+      implicit val messages = messagesApi.preferred(request)
       val filledForm = ctx.stepObject match {
         case Some(step1) => form.fill(step1)
         case None        => form
@@ -65,6 +66,7 @@ object Step1 extends Controller {
     }
 
     def post(ctx: WorkflowContext[Step1Result])(implicit request: Request[Any]): Future[Either[Result, Step1Result]] = Future {
+      implicit val messages = messagesApi.preferred(request)
       val boundForm = form.bindFromRequest
       boundForm.fold(
         formWithErrors => Left(BadRequest(views.html.step1(ctx, formWithErrors))),
@@ -96,7 +98,7 @@ object Step1 extends Controller {
 
 // ------------- step2 ---------------------------------------------------------
 
-object Step2 extends Controller {
+object Step2 extends Results {
 
   def apply(step1Result: Step1Result)(implicit ec: ExecutionContext): Step[Unit] = {
 

@@ -2,8 +2,14 @@
 
 @(ctx: workflow.WorkflowContext[Unit], step1Result: Step1Result)
 
+<html>
+<body>
+
 <p>Hello @step1Result.name</p>
 
 @ctx.actionPrevious.map { previous =>
   <a href="@previous">Back</a>
 }
+
+</body>
+</head>
