@@ -1,4 +1,4 @@
-name := "play-workflow-example"
+name := "play-workflow-demo"
 
 organization := "com.passivsystems"
 

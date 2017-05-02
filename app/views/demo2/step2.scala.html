@@ -1,9 +1,8 @@
-@import example._
+@import example.demo2._
 
 @(ctx: workflow.WorkflowContext[Unit], step1Result: Step1Result)
 
-<html>
-<body>
+@main {
 
 <p>Hello @step1Result.name</p>
 
@@ -11,5 +10,4 @@
   <a href="@previous">Back</a>
 }
 
-</body>
-</head>
+}

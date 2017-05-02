@@ -1,3 +1,8 @@
-POST    /exampleflow/:stepKey    example.ExampleFlow.post(stepKey)
-GET     /exampleflow/:stepKey    example.ExampleFlow.get(stepKey)
-GET     /exampleflow/:stepKey/ws example.ExampleFlow.ws(stepKey)
+GET     /                  example.Index.index
+
+POST    /demo1/:stepKey    example.demo1.Flow.post(stepKey)
+GET     /demo1/:stepKey    example.demo1.Flow.get(stepKey)
+
+POST    /demo2/:stepKey    example.demo2.Flow.post(stepKey)
+GET     /demo2/:stepKey    example.demo2.Flow.get(stepKey)
+GET     /demo2/:stepKey/ws example.demo2.Flow.ws(stepKey)

@@ -1,10 +1,9 @@
-@import example._
+@import example.demo2._
 @import helper._
 
 @(ctx: workflow.WorkflowContext[Step1Result], stepForm: Form[Step1Result])(implicit messages: Messages)
 
-<html>
-<body>
+@main {
 
 @stepForm.globalError.map { error => @Html(Messages(error.message)) }
 <form role="form" method="post" action="@ctx.actionCurrent">
@@ -28,5 +27,4 @@
   }
 </script>
 
-</body>
-</head>
+}
