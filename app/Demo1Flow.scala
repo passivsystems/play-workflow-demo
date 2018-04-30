@@ -12,7 +12,7 @@ package object demo1 {
   // ------------- flow ----------------------------------------------------------
 
   class Flow @Inject()(implicit ec:            ExecutionContext,
-                                actionBuilder: ActionBuilder[Request, AnyContent],
+                                actionBuilder: DefaultActionBuilder,
                                 messagesApi:   MessagesApi) {
 
     val workflow: Workflow[Unit] =

@@ -15,10 +15,10 @@ package object demo2 {
   // ------------- flow ----------------------------------------------------------
 
   class Flow @Inject()(implicit ec:           ExecutionContext,
-                                     actorSystem:   ActorSystem,
-                                     materializer:  Materializer,
-                                     actionBuilder: ActionBuilder[Request, AnyContent],
-                                     messagesApi:   MessagesApi) {
+                                actorSystem:   ActorSystem,
+                                materializer:  Materializer,
+                                actionBuilder: DefaultActionBuilder,
+                                messagesApi:   MessagesApi) {
 
     val workflow: Workflow[Unit] =
       for {
